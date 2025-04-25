@@ -5,7 +5,8 @@
 #include<stddef.h>
 #include<stdlib.h>
 
-typedef enum {
+typedef enum
+{
     TOKEN_WORD,
     TOKEN_PIPE,
     TOKEN_REDIRECT_IN,
@@ -19,7 +20,8 @@ typedef enum {
     TOKEN_INVALID
 } token_type;
 
-typedef struct s_token {
+typedef struct s_token 
+{
     token_type type;
     char *value;
     struct s_token *next;
