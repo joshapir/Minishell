@@ -17,10 +17,17 @@ int ft_word_count(char *str)
            // flag = 0;
             i++;
         }
-        if ((str[i]) && str[i] != ' ')
-                count++;
-        while((str[i]) && str[i] != ' ')
+        if ((str[i]) && (str[i] != ' '))
+		{
+			if (is_token(str[i]))
+				count++;
+
+			count++;
+		}
+        while((str[i]) && (str[i] != ' '))
         {
+			if (is_token(str[i]))
+					count++;
             i++;
         }
     }
@@ -34,10 +41,14 @@ int ft_letter_count(char *str, int i)
 
     count = 0;
 
-    while ((str[i]) && str[i] == ' ')
+    while ((str[i]) && (str[i] == ' '))
          i++;
-    while ((str[i]) && str[i] != ' ')
+    while ((str[i]) && (str[i] != ' '))
     {
+		if (is_token(str[i]))
+		{
+			return(count);
+		}
         count++;
         i++;
     }
@@ -46,9 +57,11 @@ int ft_letter_count(char *str, int i)
 }
  int   ft_next_word(char *str, int i)
 {
+	//if (str[i] != ' ')
+	//		return(i);
     while ((str[i]) && (str[i] != ' '))
             i++;
-    while((str[i]) && str[i] == ' ')
+    while((str[i]) && (str[i] == ' '))
         i++;
     return(i);
 }
@@ -62,8 +75,9 @@ char **ft_split(char *str)
     i = 0;
     j = 0;
     word_count = ft_word_count(str);
+	printf ("word cont = %d\n", word_count);
     arr = malloc(sizeof(char *) * (word_count + 1));
-    if ((str[i]) && str[i] == ' ')
+    if ((str[i]) && (str[i] == ' '))
         i = ft_next_word(str, i);
     while (j < word_count)
     {
@@ -81,8 +95,18 @@ char **ft_split(char *str)
         i = ft_next_word(str, i);
     while(str[i])
     {
-        while ((str[i]) && str[i] != ' ')
+        while ((str[i]) && (str[i] != ' '))
         {
+			if (is_token(str[i]))
+			{
+				arr[j][k] = '\0';
+				j++;
+				k = 0;
+				arr[j][k] = str[i];
+				k++;
+				arr[j][k] = '\0';
+				break ;
+			}
                 arr[j][k] = str[i];
                 i++;
                 k++;
@@ -119,13 +143,13 @@ int main (void)
     free (arr);
 }
 */
-/*
+
 int main(void)
 {
     char *test_cases[] = {
         "",
         "   ",
-        "hello",
+        "he|llo",
         "hello world",
         "  leading space",
         "trailing space   ",
@@ -153,4 +177,4 @@ int main(void)
 
     return 0;
 }
-*/
+

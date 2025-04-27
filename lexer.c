@@ -1,5 +1,5 @@
 #include "minishell.h"
-
+/*
 t_token *lexer (char *str)
 {
 	t_token *head;
@@ -21,19 +21,19 @@ t_token *lexer (char *str)
 				if (!head)
 				{	
 					free(head);
-					head = new_token(type, arr[i]);
+					head = new_token(type, arr[i], 0);
 					current = head;
 				}
 				else
 				{
-					current->next = new_token(type, arr[i]);
+					current->next = new_token(type, arr[i], 0);
 					current = current->next;
 				}
 		i++;
 	}
 	return(head);
 }
-
+*/
 void print_enum(t_token *list)
 {
 	if (list->type == 0)
@@ -79,7 +79,7 @@ int main (int argc, char **argv)
 	i = 0;
 	(void) argc;
 	//char *str = "\"test hello\"";
-	char *str = "test hello";
+	char *str = "test |hello";
 	t_token *node = lexer(str);
 	print_list(node);
 

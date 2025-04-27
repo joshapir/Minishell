@@ -15,9 +15,11 @@ int is_token(char c)
                 return(1);
         else if (c == '>')
                 return(1);
-        else if(c == ';')
+        else if (c == ';')
                 return(1);
-        else
+        else if (c == '"')
+				return(1);
+		else
                 return(0);
 }
 int is_word(char *str)
@@ -50,8 +52,8 @@ token_type  find_token_type(char *str)
     {
         if (is_word(str))
             return(TOKEN_WORD);
-        else
-            return (0);
+       // else
+           // return (TOKEN_INVALID);
     }
     char c = str[0];
         if (c == '|')
@@ -71,5 +73,5 @@ token_type  find_token_type(char *str)
         else if (is_word(str))
             return(TOKEN_WORD);
         else
-            return(0);
+            return(TOKEN_INVALID);
 }

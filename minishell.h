@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stddef.h>
 #include<stdlib.h>
+#include <stdbool.h>
 
 typedef enum
 {
@@ -24,6 +25,7 @@ typedef struct s_token
 {
     token_type type;
     char *value;
+    bool inside_quotes;
     struct s_token *next;
 } t_token;
 
@@ -33,7 +35,8 @@ char **ft_split(char *str);
 token_type find_token_type(char *str);
 int is_word(char *str);
 int is_token(char c);
-t_token *new_token(token_type type, char *value);
+t_token *new_token(token_type type, char *value, int flag);
 t_token *lexer (char *str);
-
+int has_token(char *str);
+t_token *lexer (char *str);
 #endif
