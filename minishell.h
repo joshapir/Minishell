@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stddef.h>
 #include<stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 typedef enum
@@ -39,4 +40,5 @@ t_token *new_token(token_type type, char *value, int flag);
 t_token *lexer (char *str);
 int has_token(char *str);
 t_token *lexer (char *str);
+char *ft_strdup_char (char c);
 #endif

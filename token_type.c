@@ -18,8 +18,8 @@ int is_token(char c)
         else if (c == ';')
                 return(1);
         else if (c == '"')
-				return(1);
-		else
+		return(1);
+	else
                 return(0);
 }
 int is_word(char *str)
@@ -33,8 +33,8 @@ int is_word(char *str)
         i++;
     if (str[i - 1] == '\'' && str[0] == '\'')
         return(1);
-    if (str[i - 1] == '"' && str[0] == '"')
-        return(1);
+ //   if (str[i - 1] == '"' && str[0] == '"')
+   //     return(1);
     if (str[0] == '$')
         return(1);
     i = 0;
@@ -48,14 +48,12 @@ int is_word(char *str)
 }
 token_type  find_token_type(char *str)
 {
-    if (str[1])
-    {
-        if (is_word(str))
-            return(TOKEN_WORD);
-       // else
-           // return (TOKEN_INVALID);
-    }
-    char c = str[0];
+        char c;
+       
+  // if (str[0])
+        c = str[0];
+      //  else
+             //   return(TOKEN_INVALID);
         if (c == '|')
                 return(TOKEN_PIPE);
         else if (c == '$')
@@ -70,8 +68,8 @@ token_type  find_token_type(char *str)
                 return(TOKEN_REDIRECT_OUT);
         else if(c == ';')
             return(TOKEN_SEPARATOR);
-        else if (is_word(str))
-            return(TOKEN_WORD);
+      //  else if (is_word(str))
+       //     return(TOKEN_WORD);
         else
             return(TOKEN_INVALID);
 }

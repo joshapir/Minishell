@@ -78,8 +78,8 @@ int main (int argc, char **argv)
 
 	i = 0;
 	(void) argc;
-	//char *str = "\"test hello\"";
-	char *str = "test |hello";
+	char *str = "\"test hello\" helloooo test";
+	//char *str = "test |hello";
 	t_token *node = lexer(str);
 	print_list(node);
 
