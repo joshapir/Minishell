@@ -1,6 +1,6 @@
 #include "minishell.h"
 
-
+/*
 void split_token(char *str)
 {
 	int i;
@@ -17,6 +17,7 @@ void split_token(char *str)
 	
 
 }
+*/
 t_token *new_token(token_type type, char *value, int flag)
 {
 	char c;

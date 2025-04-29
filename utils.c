@@ -30,4 +30,3 @@ char *ft_strdup (char *str)
     dup[i] = '\0';
     return(dup);
 }
-
