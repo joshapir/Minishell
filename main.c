@@ -1,109 +1,141 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: joshapir <joshapir@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/29 12:36:52 by shimi-be          #+#    #+#             */
+/*   Updated: 2025/08/26 17:16:48 by shimi-be         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "minishell.h"
-/*
-t_token *lexer (char *str)
-{
-	t_token *head;
-	t_token *current;
-	int i;
-	int j;
-	char **arr;
-	token_type type;
 
-	i = 0;
-	j = 0;
-	printf("%s\n", str);
-	arr = ft_split(str);
-	//head = new_token(TOKEN_INVALID, NULL);
-	head = NULL;
-	while(arr[i])
+pid_t	command_fork(t_shell *elem, t_env **env, int *prev_fd)
+{
+	int		next_pipe[2];
+	pid_t	pid;
+	int		need_next;
+	int		next_read;
+	int		next_write;
+
+	init_rw(elem, &need_next, &next_read, &next_write);
+	next_pipe[0] = -1;
+	next_pipe[1] = -1;
+	prepare_pipe(next_pipe, need_next, &next_read, &next_write);
+	pid = fork();
+	if (pid < 0)
+		perror("fork");
+	if (pid < 0)
+		exit(1);
+	if (pid == 0)
 	{
-			type = find_token_type(arr[i]);
-				if (!head)
-				{	
-					free(head);
-					head = new_token(type, arr[i], 0);
-					current = head;
-				}
-				else
-				{
-					current->next = new_token(type, arr[i], 0);
-					current = current->next;
-				}
-		i++;
+		if (next_read != -1)
+			close(next_read);
+		child_process(elem, env, *prev_fd, next_write);
+		exit(1);
 	}
-	return(head);
-}
-*/
-void print_enum(t_token *list)
-{
-	if (list->type == 0)
-    	printf("TOKEN_WORD ");
-    if (list->type == 1)
-    	printf("TOKEN_PIPE ");
-    if (list->type == 2)
-    	printf("TOKEN_REDIRECT_IN ");
-    if (list->type == 3)
-    	printf("TOKEN_REDIRECT_OUT ");
-    if (list->type == 4)
-    	printf("TOKEN_APPEND ");
-    if (list->type == 5)
-    	printf("TOKEN_HEREDOC ");
-    if (list->type == 6)
-    	printf("TOKEN_SEPARATOR ");
-    if (list->type == 7)
-    	printf("TOKEN_QUOTE_SINGLE ");
-    if (list->type == 8)
-    	printf("TOKEN_QUOTE_DOUBLE ");
-    if (list->type == 9)
-    	printf("TOKEN_VARIABLE ");
-    if (list->type == 10)
-    	printf("TOKEN_INVALID ");
+	signal(SIGINT, SIG_IGN);
+	close_prev_next(prev_fd, next_read, next_write);
+	return (pid);
 }
 
-
-void print_list(t_token *head) 
+void	execute_loop(t_shell *elem, t_env **env, int *fd_val,
+		int **last_status_ptr_out)
 {
-    t_token *current = head;
-    while (current != NULL) 
+	int	*pids;
+	int	pid;
+	int	count;
+
+	count = 0;
+	pids = calloc((count_commands(elem)) + 1, sizeof(int));
+	while (elem && elem->type)
 	{
-		print_enum(current);
-		if (current->inside_quotes)
-			printf("[inside quotes]");
-        printf("-> %s\n", current->value);
-		
-        current = current->next;
-    }
-    printf("NULL\n");
+		if (elem->command->heredoc)
+		{
+			do_heredoc(elem->command, *env, elem->exit_status_code, fd_val);
+			break ;
+		}
+		if (execute_loop_loop(elem, env, last_status_ptr_out, fd_val) == 0)
+		{
+			pid = command_fork(elem, env, fd_val);
+			pids[count++] = (int)pid;
+			*last_status_ptr_out = elem->exit_status_code;
+			elem = elem->next;
+		}
+		else
+			break ;
+	}
+	wait_children(pids, count, *last_status_ptr_out, fd_val);
 }
 
-
-void free_tokens(t_token *head)
+void	do_commands(t_shell *elem, t_env **env, int fd_val)
 {
-    t_token *tmp;
+	int	old_stdout;
+	int	old_stdin;
+	int	*last_status_ptr;
 
-    while (head)
-    {
-        if (head->value)
-            free(head->value);
-		tmp = head->next;
-		free(head);
-        head = tmp;
-    }
+	old_stdout = -1;
+	old_stdin = -1;
+	old_stdout = dup(STDOUT_FILENO);
+	old_stdin = dup(STDIN_FILENO);
+	execute_loop(elem, env, &fd_val, &last_status_ptr);
+	if (old_stdout != -1)
+		dup2(old_stdout, STDOUT_FILENO);
+	if (old_stdout != -1)
+		close(old_stdout);
+	if (old_stdin != -1)
+		dup2(old_stdin, STDIN_FILENO);
+	if (old_stdin != -1)
+		close(old_stdin);
 }
 
-int main (int argc, char **argv)
+int	init_execute(t_token *node, t_token *head, t_env *env, int *exit_status)
 {
-	int i;
+	t_cmd	*t_head;
+	t_shell	*element;
 
-	i = 0;
-	(void) argc;
-	//char *str = argv[1];
-	char *str = "\"\'quoted_word hello\'\"echo|test><$";
-	//char *str = "test |hello";
-	t_token *node = lexer(str);
-	t_token *head = node;
-	print_list(node);
-	free_tokens(head);
+	element = NULL;
+	t_head = init_cmds(node, *exit_status, env);
+	if (pre_struct_exit(t_head, exit_status, env, head))
+		return (1);
+	do_struct(&element, t_head, exit_status);
+	do_commands(element, &env, -1);
+	if (t_head)
+		free_cmds(t_head);
+	if (element != NULL)
+	{
+		free_shell(element);
+		element = NULL;
+	}
+	return (0);
+}
 
+int	main(int argc, char *argv[], char *envp[])
+{
+	char	*line;
+	t_env	*env;
+	int		*exit_status;
 
+	if (!pre_start_check(argc, argv, envp))
+		return (1);
+	exit_status = (int *)malloc(sizeof(int));
+	*exit_status = 0;
+	env = copy_env(envp);
+	while (1)
+	{
+		if (!env)
+			return (printf("Error, copying the env.\n"), 1);
+		signal(SIGINT, handle_sigint);
+		signal(SIGQUIT, SIG_IGN);
+		line = readline("\033[1;34mminishell>\033[0m ");
+		if (check_line(line) == 1)
+			break ;
+		if (pre_exec(line, env, exit_status) == 1)
+			break ;
+	}
+	clear_history();
+	free_combined(exit_status, env);
+	return (0);
 }
