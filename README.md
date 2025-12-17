@@ -21,7 +21,7 @@ Minishell is a fully functional UNIX shell that replicates core bash features in
 
 ## Installation
 ```bash
-git clone [your-repository-url] minishell
+git clone https://github.com/joshapir/Minishell minishell
 cd minishell
 make
 ./minishell
