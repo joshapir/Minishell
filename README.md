@@ -13,7 +13,7 @@ Minishell is a fully functional UNIX shell that replicates core bash features in
 - **Redirections** (`<`, `>`, `>>`, `<<`)
 - **Quote handling** (single and double quotes)
 - **Environment variables** (`$VAR`, `$?`)
-- **Signal handling** (ctrl-C, ctrl-D, ctrl-\)
+- **Signal handling** (ctrl-C, ctrl-D)
 - **Command history**
 
 ### Built-in Commands
